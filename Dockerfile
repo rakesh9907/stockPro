@@ -1,6 +1,6 @@
 FROM python:3.10-slim
 
-# Install system dependencies
+# Install TA-Lib and system packages
 RUN apt-get update && \
     apt-get install -y build-essential wget && \
     wget http://prdownloads.sourceforge.net/ta-lib/ta-lib-0.4.0-src.tar.gz && \
@@ -10,10 +10,7 @@ RUN apt-get update && \
 
 ENV LD_LIBRARY_PATH="/usr/lib:$LD_LIBRARY_PATH"
 
-# Create a non-root user
-RUN useradd -m appuser
-
-# Set working directory
+# Set work directory
 WORKDIR /app
 
 # Copy and install Python dependencies
@@ -23,11 +20,9 @@ RUN pip install --upgrade pip && pip install -r requirements.txt
 # Copy application code
 COPY . .
 
-# Switch to non-root user
-USER appuser
+# ✅ Choreo requirement: use UID in range 10000–20000
+USER 10001
 
-# Expose port (optional)
-EXPOSE 5000
+EXPOSE 8000
 
-# Run the app
-CMD ["gunicorn", "app:app", "--bind", "0.0.0.0:5000"]
+CMD ["gunicorn", "app:app", "--bind", "0.0.0.0:8000"]
